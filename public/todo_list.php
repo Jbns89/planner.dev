@@ -1,8 +1,9 @@
 <?php 
-	var_dump($_POST); 
-	var_dump($_GET);
-	var_dump($_FILES);
+	// var_dump($_POST); 
+	// var_dump($_GET);
+	// var_dump($_FILES);
 	define('FILE', 'list_items.txt');
+	
 	
 	function open_file($file) 
 	{                              
@@ -32,11 +33,18 @@
 		$items = array_values($items);
 		save_file($items);
 	}
-	if (count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK) {
+	if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
         $upload_dir = '/vagrant/sites/planner.dev/public/uploads/';
-        $filename = basename($_FILES['file1']['name']);
+        $filename = basename($_FILES['uploaded']['name']);
         $saved_filename = $upload_dir . $filename;
-        move_uploaded_file($_FILES['file1']['tmp_name'], $saved_filename);
+        move_uploaded_file($_FILES['uploaded']['tmp_name'], $saved_filename);
+        //open_file is finding the new items by 
+        //$filename being added onto the the uploads/ path
+        $newItems = open_file("uploads/" . $filename);
+        //need to create a new variable so that once the arrays merge
+        //they'll be saved and over written the items array 
+        $items = array_merge($items, $newItems);
+        save_file($items, FILE);
     }
     if (isset($saved_filename)) {
     	echo "<p>You can download your file <a href='/uploads/{$filename}'>here</a>.</p>";
@@ -66,8 +74,8 @@
 		</form>
 		<form clas="uploads" method="POST" enctype="multipart/form-data" action="todo_list.php">
 			<p>
-				<label for="file1">File to upload </label>
-				<input type="file" id="file1" name="file1">
+				<label for="uploaded">File to upload </label>
+				<input type="file" id="uploaded" name="uploaded">
 			</p>
 			<p>
 				<input type="submit" value="Upload">
