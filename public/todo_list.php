@@ -4,21 +4,17 @@
 	// var_dump($_FILES);
 	define('FILE', 'list_items.txt');
 	
-	
-	function open_file($file) 
-	{                              
+	function open_file($file) {                              
 	   $handle=fopen($file, 'r');
 	   $content=trim(fread($handle,filesize($file)));
 	   fclose($handle);
 	   return explode("\n",$content);
 	}
 	
-	function save_file($items, $file = FILE)
-	{
+	function save_file($items, $file = FILE){
 		$handle=fopen($file, 'w');
-        foreach ($items as $item) 
-        {
-           fwrite($handle, PHP_EOL . $item);
+        foreach ($items as $item) {
+           fwrite($handle, PHP_EOL . htmlspecialchars((strip_tags($item))));
         }
         fclose($handle);
 	}
@@ -46,9 +42,6 @@
         $items = array_merge($items, $newItems);
         save_file($items, FILE);
     }
-    if (isset($saved_filename)) {
-    	echo "<p>You can download your file <a href='/uploads/{$filename}'>here</a>.</p>";
-	}
 ?>
 
 <!doctype html>
@@ -60,11 +53,11 @@
 	<body>
 		<h2>To Do List for today:</h2>
 		<ul>
-			<?php 
-				foreach ($items as $key => $value) {
-					echo "<li>$value<a href='?remove=$key'>Complete</a></li>";
-				}
-			?>
+			<?php foreach ($items as $key => $value): ?>
+					<!-- Don't need to have quotes around $key
+					you will cause items to not be removed--> 
+					<li><?= "$value"?><a href=?remove=<?=$key?>>Complete</a></li>
+			<?php endforeach; ?>
 		</ul>
 		<h2>Enter your to do list item</h2>
 		<form class="addItem" method="post" action="todo_list.php">
@@ -79,6 +72,10 @@
 			</p>
 			<p>
 				<input type="submit" value="Upload">
+				<?php if (isset($saved_filename)): ?>
+					<!-- Here you would need single quotes in the anchor tag-->
+    				<p>You can download your file <a href='uploads/<?=$filename?>'>here</a.</p>
+				<?php endif; ?>
 			</p>
 		</form>
 	</body>
