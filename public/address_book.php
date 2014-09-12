@@ -2,44 +2,85 @@
 
 define('FILE', 'address_book.csv');
 
-$address_book = [
-    ['Jill D','14396 Boonies Ln','San Antonio','TX','78221','210-555-5555'],
-    ['Cy T','14396 Boonies Ln','San Antonio','TX','78221','210-555-5556'],
-    ['Mike L','801 Shady Apts Rd','San Antonio','TX','78221','210-555-5557'],
-    ['Michelle S','319 Michocana Dr','San Antonio','TX','78221','210-555-5558']
-];
-
-function save_csv($array, $file = FILE){
-    $handle = fopen($file, 'w');
-    foreach ($array as $rows) {
-        fputcsv($handle, $rows);
+class AddressDataStore{
+    public $filename = '';
+    
+    public function __construct($files = FILE) {
+        $this->filename = $files;
     }
-    fclose($handle);
-    return $array;
-}
+    
+    public function read_address_book() {
+
+        if (filesize($this->filename) == 0) {
+            $array = [];
+        }
+        
+        else {
+            $handle = fopen($this->filename, 'r');
+            
+            while(!feof($handle)) {
+                $row = fgetcsv($handle);
+                
+                if (!empty($row)) {
+                    $array[] = $row;
+                }
+            }
+            fclose($handle);
+        }
+        
+        return $array;
+    }
+    
+    public function write_address_book($array){
+        $handle = fopen($this->filename, 'w');
+        foreach ($array as $rows) {
+            fputcsv($handle, $rows);
+        }
+        fclose($handle);
+        return $array;
+    }
+    
+} 
+//You dont need to call the construct function here
+//because the AddressDataStore will already do that.
+//You also need to pass a variable in the 
+//AddressDataStore object but I already have a default 
+//file set.
+$ads_bk = new AddressDataStore();
+$address_book = $ads_bk->read_address_book();
 
 if (!empty($_POST)) {
     $newAddress = [
-        $_POST['Name'],
-        $_POST['Street'],
-        $_POST['City'],
-        $_POST['State'],
-        $_POST['Zipcode'],
-        $_POST['Phone']
+        htmlspecialchars(strip_tags($_POST['Name'])),
+        htmlspecialchars(strip_tags($_POST['Street'])),
+        htmlspecialchars(strip_tags($_POST['City'])),
+        htmlspecialchars(strip_tags($_POST['State'])),
+        htmlspecialchars(strip_tags($_POST['Zipcode'])),
+        htmlspecialchars(strip_tags($_POST['Phone']))
     ];
-    array_push($address_book, $newAddress);
-    save_csv($address_book);
+    $address_book[] = $newAddress;
+    $ads_bk->write_address_book($address_book);
 }
 
-function read_csv($array, $file = FILE){
-    $handle = fopen(FILE, 'r');
-    $array = [];
-    while(!feof($handle)) {
-      $array[] = fgetcsv($handle);
+if (isset($_GET['remove'])) {
+        $keyRemoved = $_GET['remove'];
+        unset($address_book[$keyRemoved]);
+        array_values($address_book);
+        $ads_bk->write_address_book($address_book);
     }
-    fclose($handle);
-}
-
+if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
+        $upload_dir = '/vagrant/sites/planner.dev/public/uploads/';
+        $filename = basename($_FILES['uploaded']['name']);
+        $saved_filename = $upload_dir . $filename;
+        move_uploaded_file($_FILES['uploaded']['tmp_name'], $saved_filename);
+        //everytime you create a new object i.e new AddressDataStore you must 
+        //pass it to a new variable
+        $new_ads_bk = new AddressDataStore($saved_filename);
+        $newAds = $new_ads_bk->read_address_book();
+        $address_book = array_merge($address_book, $newAds);
+        $ads_bk->write_address_book($address_book);
+    }
+    
 ?>
 <html>
 <head>
@@ -55,6 +96,7 @@ function read_csv($array, $file = FILE){
             <th>State</th>
             <th>Zipcode</th>
             <th>Phone</th>
+            <th>Remove</th>
         </tr>
         <!-- Loop Time! -->
         <!-- Needed to nested foreach loops to access each ndividual 
@@ -67,19 +109,32 @@ function read_csv($array, $file = FILE){
                     instead of it being just one long data cell -->
                     <td><?= $value?></td>
                 <?php endforeach; ?>
-            <?php endforeach; ?></tr>
+                <td><a href=?remove=<?=$index?>>Delete</a></td>
+            <?php endforeach; ?>
+           
+            </tr>
     </table>
     
     <h2>Enter your new contact</h2>
-        <form method="post" action="address_book.php">
+        <form method="POST" action="address_book.php">
             <label for="Addresses"></label>
                 <input id="Addresses" name="Name" type="text" placeholder="Name">
                 <input id="Addresses" name="Street" type="text" placeholder="Street">
                 <input id="Addresses" name="City" type="text" placeholder="City">
                 <input id="Addresses" name="State" type="text" placeholder="State">
                 <input id="Addresses" name="Zipcode" type="text" placeholder="Zipcode">
-                <input id="Addresses" name="Phone" type="text" placeholder="Phone">
+                <input id="Addresses" name="Phone" type="text" placeholder="(555)555-5555">
             <button type="Submit">Add</button>
         </form>
+        <form clas="uploads" method="POST" enctype="multipart/form-data" action="address_book.php">
+            <label for="uploaded">File to upload </label>
+            <input type="file" id="uploaded" name="uploaded">
+            <input type="submit" value="Upload">
+            <?php if (isset($saved_filename)): ?>
+                    <!-- Here you would need single quotes in the anchor tag-->
+                    <p>You can download your file <a href='uploads/<?=$filename?>'>here</a.</p>
+            <?php endif; ?>
+        </form>
+
 </body>
 </html>
