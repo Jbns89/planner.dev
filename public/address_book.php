@@ -2,13 +2,14 @@
 
 define('FILE', 'address_book.csv');
 
-include('classes/address_data_store.php');
+require_once('../inc/filestore.php');
+require_once('classes/address_data_store.php');
 //You dont need to call the construct function here
 //because the AddressDataStore will already do that.
 //You also need to pass a variable in the 
 //AddressDataStore object but I already have a default 
 //file set.
-$ads_bk = new AddressDataStore();
+$ads_bk = new AddressDataStore(FILE);
 $address_book = $ads_bk->read_address_book();
 
 if (!empty($_POST)) {
