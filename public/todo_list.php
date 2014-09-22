@@ -1,46 +1,40 @@
 <?php 
+
 	// var_dump($_POST); 
 	// var_dump($_GET);
 	// var_dump($_FILES);
 	define('FILE', 'list_items.txt');
-	
-	function open_file($file) {                              
-	   $handle=fopen($file, 'r');
-	   $content=trim(fread($handle,filesize($file)));
-	   fclose($handle);
-	   return explode("\n",$content);
-	}
-	
-	function save_file($items, $file = FILE){
-		$handle=fopen($file, 'w');
-        foreach ($items as $item) {
-           fwrite($handle, PHP_EOL . htmlspecialchars((strip_tags($item))));
-        }
-        fclose($handle);
-	}
-	$items = open_file(FILE);
-	if (isset($_POST['Todo'])) {
+    
+    require_once ('../inc/filestore.php');
+    
+    $lists = new Filestore(FILE);
+    $items = $lists->read_lines();
+
+	if (isset($_POST['Todo'])) 
+    {
 		$items[] = $_POST['Todo'];
-		save_file($items);
+		$lists->write_lines($items);
 	}
-	if (isset($_GET['remove'])) {
+	if (isset($_GET['remove'])) 
+    {
 		$keyRemoved = $_GET['remove'];
 		unset($items[$keyRemoved]);
 		$items = array_values($items);
-		save_file($items);
+		$lists->write_lines($items);
 	}
-	if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
+	if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) 
+    {
         $upload_dir = '/vagrant/sites/planner.dev/public/uploads/';
         $filename = basename($_FILES['uploaded']['name']);
         $saved_filename = $upload_dir . $filename;
         move_uploaded_file($_FILES['uploaded']['tmp_name'], $saved_filename);
         //open_file is finding the new items by 
         //$filename being added onto the the uploads/ path
-        $newItems = open_file("uploads/" . $filename);
+        $itemsNew = $lists->read_lines("uploads/" . $filename);
         //need to create a new variable so that once the arrays merge
         //they'll be saved and over written the items array 
-        $items = array_merge($items, $newItems);
-        save_file($items, FILE);
+        $items = array_merge($items, $itemsNew);
+        $lists->write_lines($items, FILE);
     }
 ?>
 
