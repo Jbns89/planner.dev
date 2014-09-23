@@ -10,7 +10,7 @@ require_once('classes/address_data_store.php');
 //AddressDataStore object but I already have a default 
 //file set.
 $ads_bk = new AddressDataStore(FILE);
-$address_book = $ads_bk->read_address_book();
+$address_book = $ads_bk->read();
 
 if (!empty($_POST)) {
     $newAddress = [
@@ -22,14 +22,14 @@ if (!empty($_POST)) {
         htmlspecialchars(strip_tags($_POST['Phone']))
     ];
     $address_book[] = $newAddress;
-    $ads_bk->write_address_book($address_book);
+    $ads_bk->write($address_book);
 }
 
 if (isset($_GET['remove'])) {
         $keyRemoved = $_GET['remove'];
         unset($address_book[$keyRemoved]);
         array_values($address_book);
-        $ads_bk->write_address_book($address_book);
+        $ads_bk->write($address_book);
     }
 if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
         $upload_dir = '/vagrant/sites/planner.dev/public/uploads/';
@@ -39,19 +39,25 @@ if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
         //everytime you create a new object i.e new AddressDataStore you must 
         //pass it to a new variable
         $new_ads_bk = new AddressDataStore($saved_filename);
-        $newAds = $new_ads_bk->read_address_book();
+        $newAds = $new_ads_bk->read();
         $address_book = array_merge($address_book, $newAds);
-        $ads_bk->write_address_book($address_book);
+        $ads_bk->write($address_book);
     }
     
 ?>
-<html>
-<head>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title> Address Book </title>
     <link rel="stylesheet" type="text/css" href="/css2/address_style.css">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <table>
+    <div class="container">
+    <table class="table">
         <tr>
             <th>Name</th>
             <th>Street</th>
@@ -77,8 +83,9 @@ if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
            
             </tr>
     </table>
-    
-    <h2>Enter your new contact</h2>
+    </div>
+    <div class='container'>
+    <h3>Enter your new contact</h3>
         <form method="POST" action="address_book.php">
             <label for="Addresses"></label>
                 <input id="Addresses" name="Name" type="text" placeholder="Name">
@@ -87,17 +94,20 @@ if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) {
                 <input id="Addresses" name="State" type="text" placeholder="State">
                 <input id="Addresses" name="Zipcode" type="text" placeholder="Zipcode">
                 <input id="Addresses" name="Phone" type="text" placeholder="(555)555-5555">
-            <button type="Submit">Add</button>
+            <button type="submit" class="btn btn-info">Add</button>
         </form>
         <form clas="uploads" method="POST" enctype="multipart/form-data" action="address_book.php">
             <label for="uploaded">File to upload </label>
             <input type="file" id="uploaded" name="uploaded">
-            <input type="submit" value="Upload">
+            <input class="btn btn-info btn-sm" type="submit" value="Upload">
             <?php if (isset($saved_filename)): ?>
                     <!-- Here you would need single quotes in the anchor tag-->
                     <p>You can download your file <a href='uploads/<?=$filename?>'>here</a.</p>
             <?php endif; ?>
         </form>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+</div>
 </body>
 </html>
