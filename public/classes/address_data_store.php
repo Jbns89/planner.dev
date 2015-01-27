@@ -1,6 +1,7 @@
 <?php
 
 // TODO: require Filestore class
+require '../inc/filestore.php';
 
  class AddressDataStore extends Filestore 
  {
@@ -9,6 +10,10 @@
         //this is overwriting the parent __construct
         //so any file names are automatically set to lowercase
         parent::__construct(strtolower($files));
+    }
+    function __destruct () 
+    {
+        echo "Class dismissed!";
     }
     
  }

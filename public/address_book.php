@@ -1,7 +1,6 @@
 <?php
-
 require '../dbconn_address.php';
-
+require_once 'classes/address_data_store.php';
 if (!empty($_POST)) 
 {
     
@@ -38,11 +37,9 @@ if (!empty($_POST))
         $stmt->bindValue(':state',  $_POST['State'],  PDO::PARAM_STR);
         $stmt->bindValue(':zip',  $_POST['Zipcode'],  PDO::PARAM_STR);
         $stmt->bindValue(':phone',  $_POST['Phone'],  PDO::PARAM_STR);
-
         $stmt->execute();
     }
 }
-
 if (isset($_GET['remove'])) 
 {
     $keyRemoved = $_GET['remove'];
@@ -54,7 +51,7 @@ if (isset($_GET['remove']))
     $stmt->execute();
 }
 
-/////////////FIX THIS AT SOME POINT//////////////////
+
 
 if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) 
 {
@@ -72,15 +69,25 @@ if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK)
     
     $newAds = $new_ads_bk->read();
     
-    $address_book = array_merge($address_book, $newAds);
+    if ($newAds) {
+        foreach ($newAds as $key => $value) {
+            var_dump($value);
+            $stmt = $dbc->prepare('INSERT INTO contacts (name, street, city, state, zipcode, phone ) VALUES (:name, :street, :city, :state, :zip, :phone)');
+            
+            $stmt->bindValue(':name',  $value[0],  PDO::PARAM_STR);
+            $stmt->bindValue(':street',  $value[1],  PDO::PARAM_STR);
+            $stmt->bindValue(':city',  $value[2],  PDO::PARAM_STR);
+            $stmt->bindValue(':state',  $value[3],  PDO::PARAM_STR);
+            $stmt->bindValue(':zip',  $value[4],  PDO::PARAM_STR);
+            $stmt->bindValue(':phone',  $value[5],  PDO::PARAM_STR);
+            $stmt->execute();
+        }
+    }
     
-    $ads_bk->write($address_book);
+    
 }
-
 $stmt = $dbc->prepare("SELECT * FROM contacts");
-
 $stmt->execute();
-
 $address_book = $stmt->fetchall(PDO::FETCH_ASSOC);
     
 ?>

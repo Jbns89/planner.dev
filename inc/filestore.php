@@ -7,6 +7,8 @@ class Filestore {
 
     public function __construct($files = '')
     {
+      
+      // This is checking whether the uploaded file is csv or txt
        
        if (substr($files, -3) == 'csv')
        {
@@ -18,7 +20,10 @@ class Filestore {
        }
        $this->filename = $files;
     }
-
+    
+//---------------------------------------------------------------------------------------
+    // These are my two main functions, that will then call the 
+    //read and write for either csv or txt
     public function read()
     {
       if ($this->is_csv)
@@ -42,8 +47,13 @@ class Filestore {
           $this->write_lines($array);
         }
     }
+//---------------------------------------------------------------------------------------
     
     
+ 
+
+//---------------------------------------------------------------------------------------
+    // These functions read and write txt files
     private function read_lines()
     {
        if (filesize($this->filename) > 0 )
@@ -58,8 +68,6 @@ class Filestore {
        
     }
     
-
-
     private function write_lines($arrays)
      {
         $handle = fopen($this->filename, 'w');
@@ -69,10 +77,12 @@ class Filestore {
         }
         fclose($handle);
      }
+//---------------------------------------------------------------------------------------
 
 
 
-
+//---------------------------------------------------------------------------------------
+     //These functions read and write csv files
     private function read_csv()
      {
         if (filesize($this->filename) == 0) 
@@ -112,6 +122,7 @@ class Filestore {
      }
 
  }
+
 
 
 ?>

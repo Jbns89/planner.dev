@@ -5,8 +5,10 @@
 // var_dump($_FILES);
 
 require '../dbconn_todo.php';
+require_once '../inc/filestore.php';
 
-class InvalidInputException extends Exception { }
+
+
 
 if (isset($_POST['Todo'])) 
 {
@@ -16,8 +18,8 @@ if (isset($_POST['Todo']))
         $stmt->bindValue(':item', $_POST['Todo'], PDO::PARAM_STR);
         $stmt->execute();
     }
-
 }
+
 
 if (isset($_GET['remove'])) 
 {
@@ -27,6 +29,7 @@ if (isset($_GET['remove']))
     $stmt->execute();
     
 }
+
 
 if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK) 
 {
@@ -38,22 +41,31 @@ if (count($_FILES) > 0 && $_FILES['uploaded']['error'] == UPLOAD_ERR_OK)
     
     move_uploaded_file($_FILES['uploaded']['tmp_name'], $saved_filename);
     
-    
     //open_file is finding the new items by 
-    //$filename being added onto the the uploads/ path
-    $itemsNew = $lists->read("uploads/" . $filename);
+    //$filename being added onto the the uploads/ path  
+    $lists = new Filestore("uploads/" . $filename);
+    $itemsNew = $lists->read();
     
+    if ($itemsNew) {
+        foreach ($itemsNew as $key => $item) {
+            $stmt = $dbc->prepare("INSERT INTO todo_items (item_name) VALUES (:item)");
+            $stmt->bindValue(':item', $item, PDO::PARAM_STR);
+            $stmt->execute();
+        }
+    }
     
     //need to create a new variable so that once the arrays merge
     //they'll be saved and over written the items array 
-    $items = array_merge($items, $itemsNew);
+    // $items = array_merge($items, $itemsNew);
     
-    $lists->write($items, FILE);
+    // $lists->write($items, FILE);
 }
+
 
 $stmt = $dbc->prepare("SELECT * FROM todo_items");
 $stmt->execute();
 $items = $stmt->fetchall(PDO::FETCH_ASSOC);
+
 
 ?>
 
