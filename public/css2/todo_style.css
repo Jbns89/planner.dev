@@ -1,0 +1,44 @@
+h2{
+	color:white;
+	text-decoration: underline;
+}
+
+
+body {
+    background-color: #2E9BA2;
+    font-family: font-family: 'Architects Daughter', cursive;
+    background-image: url("http://www.picklee.com/wp-content/uploads/2012/10/elephant-pattern.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+ul{
+    background-color: rgba(255, 255, 255, 0.57);
+    list-style-type: none;
+    width: 35%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: large;
+    border: 2px rgb(67, 145, 157) dashed;
+}
+h2 {
+color: black;
+text-decoration: underline;
+width: auto;
+height: auto;
+text-align: -webkit-center;
+}
+.addItem{
+    margin-left: auto;
+    margin-right: auto;
+    width: 10%;
+}
+a{
+    float: right;
+    padding-right: 10%;
+}
+.uploads{
+    color:white;
+}

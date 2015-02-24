@@ -1,0 +1,31 @@
+Lines of Code:
+
+PHP: 721
+Template: 504
+Total: 721 + 504 = 1225
+
+Technologies:
+
+Magic Methods
+Class Variable Variables
+PDO fetchObject & PDO::FETCH_CLASS
+
+Static Methods
+Abstract Classes
+Extending PDOStatement
+Global Keyword
+
+Structure:
+├── inc
+│   ├── config.inc.php
+│   ├── dbconnect.php
+│   ├── model.class.php
+│   ├── address.class.php
+│   └── person.class.php
+├── templates
+│   ├── address.form.php
+│   └── person.form.php
+├── index.php
+├── add_address.php
+├── edit_address.php
+└── edit_person.php
